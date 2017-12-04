@@ -24,7 +24,8 @@ public class TeleOpMode extends OpMode
     private DcMotor rightrear;
     private DcMotor leftChain;
     private DcMotor rightChain;
-    private ModernRoboticsI2cGyro gyro;
+
+    //private ModernRoboticsI2cGyro gyro;
     //Servos
     private Servo leftServo;
     private Servo rightServo;
@@ -44,7 +45,7 @@ public class TeleOpMode extends OpMode
         rightrear = hardwareMap.get(DcMotor.class,"r_b");
         leftChain = hardwareMap.get(DcMotor.class,"leftchain");
         rightChain = hardwareMap.get(DcMotor.class,"rightchain");
-        gyro = hardwareMap.get(ModernRoboticsI2cGyro.class,"gyro");
+        //gyro = hardwareMap.get(ModernRoboticsI2cGyro.class,"gyro");
 
         //initiating Servos (Normal)
         //leftServo = hardwareMap.get(Servo.class,"leftservo");
@@ -63,11 +64,19 @@ public class TeleOpMode extends OpMode
         leftChain.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightChain.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        //Encoder position
+
+        int leftChain_Pos = leftChain.getCurrentPosition();
+        int rightChain_Pos = rightChain.getCurrentPosition();
+
+        telemetry.addData("LeftChain_Pos",leftChain_Pos);
+        telemetry.addData("RightChain_Pos",rightChain_Pos);
+
         //gyro
         telemetry.addData("Status", "DO NOT MOVE!!!");
-        telemetry.update();
-        gyro.calibrate();
-        telemetry.addData("Status", "Gyro Calibrated");
+        //telemetry.update();
+        //gyro.calibrate();
+        //telemetry.addData("Status", "Gyro Calibrated");
         telemetry.update();
 
         //set boolean array to false
@@ -77,6 +86,10 @@ public class TeleOpMode extends OpMode
         for(int i = 0; i< bGamepad2_stat.length; i++){
             bGamepad2_stat[i]=false;
         }
+
+        //Config mode on start
+        leftChain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightChain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //Print
         telemetry.addData("Status", "init() Done");
@@ -93,10 +106,6 @@ public class TeleOpMode extends OpMode
         timer.reset();
         telemetry.addData("Timer", "%.3f",timer.time());
         telemetry.update();
-
-        //Config mode on start
-        leftChain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightChain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override
@@ -112,6 +121,11 @@ public class TeleOpMode extends OpMode
         double gamepad1_Y = -gamepad1.left_stick_y; //leftY
         double gamepad1_Z = gamepad1.right_stick_x; //RightX
         double gamepad1_W = -gamepad1.right_stick_y; //RightY
+        boolean gamepad1_a = gamepad1.a;
+        boolean gamepad1_b = gamepad1.b;
+        boolean gamepad1_x = gamepad1.x;
+        boolean gamepad1_y = gamepad1.y;
+
         //power raw
         power_1 = Functions.MecDrive_RightFront(
                 Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
@@ -158,8 +172,8 @@ public class TeleOpMode extends OpMode
         rightrear.setPower(0);*/
 
         //chain mapped on button A on gamepad1
-        double dChainSpeed = 0.25; //slower for testing
-        if(gamepad1.a&&!bGamepad1_stat[0]){
+        double dChainSpeed = 0.9; //slower for testing
+        /*if(gamepad1.a&&!bGamepad1_stat[0]){
             //press
             bGamepad1_stat[0]=true;
             leftChain.setPower(dChainSpeed);
@@ -173,9 +187,26 @@ public class TeleOpMode extends OpMode
             bGamepad1_stat[0]=false;
             leftChain.setPower(0);
             rightChain.setPower(0);
+        }*/
+
+        if (gamepad1_a) {
+            leftChain.setPower(dChainSpeed);
+            rightChain.setPower(dChainSpeed);
         }
-
-
+        else if (gamepad1_b) {
+            leftChain.setPower(-dChainSpeed);
+            rightChain.setPower(-dChainSpeed);
+        }
+        else if (gamepad1_x) {
+            leftChain.setPower(dChainSpeed);
+        }
+        else if (gamepad1_y) {
+            rightChain.setPower(dChainSpeed);
+        }
+        else {
+            leftChain.setPower(0);
+            rightChain.setPower(0);
+        }
 
 
         //put data into dashboard
