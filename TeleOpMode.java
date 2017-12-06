@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,9 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class TeleOpMode extends OpMode
 {
-    //flag on stick button status
-    private static boolean[] bGamepad1_stat = new boolean[14];
-    private static boolean[] bGamepad2_stat = new boolean[14];
+    
     //Main Timer
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
     //DcMotors
@@ -61,34 +60,24 @@ public class TeleOpMode extends OpMode
         rightrear.setDirection(DcMotor.Direction.REVERSE);
         leftChain.setDirection(DcMotor.Direction.FORWARD);
         rightChain.setDirection(DcMotor.Direction.REVERSE);
+        right_wheel.setDirection(CRServo.Direction.FORWARD);
+        left_wheel.setDirection(CRServo.Direction.REVERSE);
 
         //config encoder run modes
         leftChain.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightChain.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        //gyro
-        telemetry.addData("Status", "DO NOT MOVE!!!");
-        //telemetry.update();
-        //gyro.calibrate();
-        //telemetry.addData("Status", "Gyro Calibrated");
-        telemetry.update();
-
-        //set boolean array to false
-        for(int i = 0; i< bGamepad1_stat.length; i++){
-            bGamepad1_stat[i]=false;
-        }
-        for(int i = 0; i< bGamepad2_stat.length; i++){
-            bGamepad2_stat[i]=false;
-        }
-
         //Config mode on start
         leftChain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightChain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        f_clawServo.scaleRange(0.3,0.7);
-        b_clawServo.scaleRange(0.3,0.7);
+        f_clawServo.scaleRange(0.3,0.9);
+        b_clawServo.scaleRange(0.3,0.9);
         telemetry.addData("F_claw POS",f_clawServo.getPosition());
         telemetry.addData("B_claw POS",b_clawServo.getPosition());
+
+        right_wheel.setPower(0);
+        left_wheel.setPower(0);
 
         //Print
         telemetry.addData("Status", "init() Done");
@@ -172,7 +161,7 @@ public class TeleOpMode extends OpMode
         rightfront.setPower(power_1);
         rightrear.setPower(power_4);
 
-        //chain mapped on button A on gamepad1
+        //chain mapped on button A&B on gamepad1
         double dChainSpeed = 0.8; //slower for testing
 
         if (gamepad1_a) {
@@ -194,9 +183,25 @@ public class TeleOpMode extends OpMode
             rightChain.setPower(0);
         }
 
+        //CRServos
+
+        if (gamepad1_x) {
+            left_wheel.setPower(1);
+            right_wheel.setPower(1);
+        }
+        else if (gamepad1_y) {
+            left_wheel.setPower(-1);
+            right_wheel.setPower(-1);
+        }
+        else {
+            left_wheel.setPower(0);
+            right_wheel.setPower(0);
+        }
+
+        //Claw Servos
 
         f_clawServo.setPosition(f_gamepad1_servo);
-        b_clawServo.setPosition(b_gamepad1_servo);
+        b_clawServo.setPosition(-b_gamepad1_servo);
 
         telemetry.addData("f_claw_pos:",f_clawServo.getPosition());
         telemetry.addData("b_claw_pos:",b_clawServo.getPosition());
@@ -220,41 +225,11 @@ public class TeleOpMode extends OpMode
         rightrear.setPower(0);
         leftChain.setPower(0);
         rightChain.setPower(0);
+        left_wheel.setPower(0);
+        right_wheel.setPower(0);
         telemetry.clearAll();
         telemetry.addData("Status","Stop Enforced");
         telemetry.update();
     }
 
 }
-
-/* Buttons
- * //when held
-        if(gamepad1.a&&!bGamepad1_stat[0]){
-            //press
-            bGamepad1_stat[0]=true;
-            testMotor.setPower(0.5);
-        }else if(gamepad1.a){
-            //hold
-            testMotor.setPower(0.5);
-        }else{
-            //release OR nothing
-            bGamepad1_stat[0]=false;
-            testMotor.setPower(0);
-        }
-
-        //when press and repress
-        if(gamepad1.a&&!bGamepad1_stat[0]){
-            //Moment of Pressing the Button
-            bGamepad1_stat[0] = true;
-            if(testMotor.getPower()!=0){
-                //if it is the second time pressing
-                testMotor.setPower(0);
-            }else{
-                //if it is the first time pressing
-                testMotor.setPower(0.5);
-            }
-        }else if(!gamepad1.a){
-            //reset gamepad state
-            bGamepad1_stat[0] = false;
-        }else{}//when motor is running and button is pressed (ignore it)
-* */
