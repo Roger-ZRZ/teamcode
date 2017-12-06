@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="TeleOpMode", group="Iterative Opmode")
@@ -25,12 +24,13 @@ public class TeleOpMode extends OpMode
     private DcMotor leftChain;
     private DcMotor rightChain;
 
-    //private ModernRoboticsI2cGyro gyro;
     //Servos
-    private Servo leftServo;
-    private Servo rightServo;
-    private Servo clawServo;
+    private Servo f_clawServo;
+    private Servo b_clawServo;
 
+    //wheel_servos
+    private CRServo right_wheel;
+    private CRServo left_wheel;
 
     @Override
     public void init() {
@@ -45,12 +45,14 @@ public class TeleOpMode extends OpMode
         rightrear = hardwareMap.get(DcMotor.class,"r_b");
         leftChain = hardwareMap.get(DcMotor.class,"leftchain");
         rightChain = hardwareMap.get(DcMotor.class,"rightchain");
-        //gyro = hardwareMap.get(ModernRoboticsI2cGyro.class,"gyro");
 
         //initiating Servos (Normal)
-        //leftServo = hardwareMap.get(Servo.class,"leftservo");
-        //rightServo = hardwareMap.get(Servo.class,"rightservo");
-        //clawServo = hardwareMap.get(Servo.class,"clawservo");
+        f_clawServo = hardwareMap.get(Servo.class,"fclaw");
+        b_clawServo = hardwareMap.get(Servo.class,"bclaw");
+
+        //init CRServos
+        right_wheel = hardwareMap.get(CRServo.class,"rwheel");
+        left_wheel = hardwareMap.get(CRServo.class,"lwheel");
 
         //set motor direction
         leftfront.setDirection(DcMotor.Direction.FORWARD);
@@ -63,14 +65,6 @@ public class TeleOpMode extends OpMode
         //config encoder run modes
         leftChain.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightChain.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        //Encoder position
-
-        int leftChain_Pos = leftChain.getCurrentPosition();
-        int rightChain_Pos = rightChain.getCurrentPosition();
-
-        telemetry.addData("LeftChain_Pos",leftChain_Pos);
-        telemetry.addData("RightChain_Pos",rightChain_Pos);
 
         //gyro
         telemetry.addData("Status", "DO NOT MOVE!!!");
@@ -88,8 +82,13 @@ public class TeleOpMode extends OpMode
         }
 
         //Config mode on start
-        leftChain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightChain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftChain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightChain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        f_clawServo.scaleRange(0.3,0.7);
+        b_clawServo.scaleRange(0.3,0.7);
+        telemetry.addData("F_claw POS",f_clawServo.getPosition());
+        telemetry.addData("B_claw POS",b_clawServo.getPosition());
 
         //Print
         telemetry.addData("Status", "init() Done");
@@ -110,6 +109,12 @@ public class TeleOpMode extends OpMode
 
     @Override
     public void loop()   {
+        //Encoder position
+        int leftChain_Pos = leftChain.getCurrentPosition();
+        int rightChain_Pos = rightChain.getCurrentPosition();
+        telemetry.addData("Left_Pos:",leftChain_Pos);
+        telemetry.addData("Right_Pos:",rightChain_Pos);
+
         //motor power settings
         double power_1;
         double power_2;
@@ -125,6 +130,8 @@ public class TeleOpMode extends OpMode
         boolean gamepad1_b = gamepad1.b;
         boolean gamepad1_x = gamepad1.x;
         boolean gamepad1_y = gamepad1.y;
+        double f_gamepad1_servo = gamepad1.right_trigger;
+        double b_gamepad1_servo = gamepad1.left_trigger;
 
         //power raw
         power_1 = Functions.MecDrive_RightFront(
@@ -165,49 +172,34 @@ public class TeleOpMode extends OpMode
         rightfront.setPower(power_1);
         rightrear.setPower(power_4);
 
-        //set in test mode to disable motors
-        /*leftfront.setPower(0);
-        leftrear.setPower(0);
-        rightfront.setPower(0);
-        rightrear.setPower(0);*/
-
         //chain mapped on button A on gamepad1
-        double dChainSpeed = 0.9; //slower for testing
-        /*if(gamepad1.a&&!bGamepad1_stat[0]){
-            //press
-            bGamepad1_stat[0]=true;
-            leftChain.setPower(dChainSpeed);
-            rightChain.setPower(dChainSpeed);
-        }else if(gamepad1.a){
-            //hold
-            leftChain.setPower(dChainSpeed);
-            rightChain.setPower(dChainSpeed);
-        }else{
-            //release OR nothing
-            bGamepad1_stat[0]=false;
-            leftChain.setPower(0);
-            rightChain.setPower(0);
-        }*/
+        double dChainSpeed = 0.8; //slower for testing
 
         if (gamepad1_a) {
+            leftChain.setTargetPosition(leftChain_Pos + 200);
             leftChain.setPower(dChainSpeed);
+            rightChain.setTargetPosition(rightChain_Pos + 200);
             rightChain.setPower(dChainSpeed);
+
         }
         else if (gamepad1_b) {
+            leftChain.setTargetPosition(leftChain_Pos - 200);
             leftChain.setPower(-dChainSpeed);
+            rightChain.setTargetPosition(leftChain_Pos - 200);
             rightChain.setPower(-dChainSpeed);
-        }
-        else if (gamepad1_x) {
-            leftChain.setPower(dChainSpeed);
-        }
-        else if (gamepad1_y) {
-            rightChain.setPower(dChainSpeed);
+
         }
         else {
             leftChain.setPower(0);
             rightChain.setPower(0);
         }
 
+
+        f_clawServo.setPosition(f_gamepad1_servo);
+        b_clawServo.setPosition(b_gamepad1_servo);
+
+        telemetry.addData("f_claw_pos:",f_clawServo.getPosition());
+        telemetry.addData("b_claw_pos:",b_clawServo.getPosition());
 
         //put data into dashboard
         telemetry.addData("Config_Main_Timer", "Run Time: " + timer.toString());
