@@ -43,7 +43,6 @@ public class Functions {
         return (RoboMap.pX*x+RoboMap.pY*y-RoboMap.pZ*z+RoboMap.pW*w);
     }
 
-
     /**Stick output
      * x - Left X
      * y - Left Y

@@ -8,8 +8,9 @@ public class RoboMap {
     protected static final int RightRear = 4;
 
     //Joystick Config
-    protected static final boolean bDeadzone = true; //if deadzone is activated
-    protected static final double dDeadzone = 0.1; //deadzone range if activated (MUST be POSITIVE)
+    //DO NOT CHANGE!!!! DO NOT USE ANY OTHER SCALING METHOD!!!!
+    protected static final boolean bDeadzone = false; //if deadzone is activated
+    protected static final double dDeadzone = 0.02; //deadzone range if activated (MUST be POSITIVE)
     protected static final boolean bNonLinearInput = false; //non-linear input method
 
     //Mecanum Driving Params - SEE teamcode.Functions

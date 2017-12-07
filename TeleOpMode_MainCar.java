@@ -2,15 +2,14 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name="TeleOpMode", group="Iterative Opmode")
+@TeleOp(name="TeleOpMode_MainCar", group="Iterative Opmode")
 
-public class TeleOpMode_test extends OpMode
+public class TeleOpMode_MainCar extends OpMode
 {
     
     //Main Timer
@@ -35,6 +34,8 @@ public class TeleOpMode_test extends OpMode
     //wheel_servos
     private CRServo right_wheel;
     private CRServo left_wheel;
+
+    public int Chain_exp = 0;
 
     @Override
     public void init() {
@@ -80,8 +81,8 @@ public class TeleOpMode_test extends OpMode
         rightChain.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //Config mode on start
-        leftChain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightChain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftChain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightChain.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         arm_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -116,20 +117,20 @@ public class TeleOpMode_test extends OpMode
         //Encoder position
         int leftChain_Pos = leftChain.getCurrentPosition();
         int rightChain_Pos = rightChain.getCurrentPosition();
-        int leftChain_Tar;
-        int rightChain_Tar;
+        telemetry.addData("Left_Pos:",leftChain_Pos);
+        telemetry.addData("Right_Pos:",rightChain_Pos);
+        telemetry.addData("Exp_Pos:",Chain_exp);
 
         //motor power settings
         double power_1;
         double power_2;
         double power_3;
         double power_4;
-        double trim_max;
         //raw stick input (Reverse both Y axis)
-        double gamepad1_X = Math.pow(gamepad1.left_stick_x,3); //leftX
-        double gamepad1_Y = Math.pow(-gamepad1.left_stick_y,3); //leftY
-        double gamepad1_Z = Math.pow(gamepad1.right_stick_x,3); //RightX
-        double gamepad1_W = Math.pow(-gamepad1.right_stick_y,3); //RightY
+        double gamepad1_X = gamepad1.left_stick_x; //leftX
+        double gamepad1_Y = -gamepad1.left_stick_y; //leftY
+        double gamepad1_Z = gamepad1.right_stick_x; //RightX
+        double gamepad1_W = -gamepad1.right_stick_y; //RightY
         boolean gamepad1_a = gamepad1.a;
         boolean gamepad1_b = gamepad1.b;
         boolean gamepad1_x = gamepad1.x;
@@ -144,33 +145,35 @@ public class TeleOpMode_test extends OpMode
         boolean gamepad1_arm_servo2_r = gamepad1.dpad_right;
 
         //power raw
-        power_1 = Functions.MecDrive_RightFront(
-                Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
+        double dChasisScale = Math.pow(Math.hypot(gamepad1_X,gamepad1_Y),2);
+
+        power_1 =Functions.MecDrive_RightFront(
+                dChasisScale*Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
+                dChasisScale*Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
                 Functions.stickMod(gamepad1_Z,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
                 Functions.stickMod(gamepad1_W,RoboMap.bDeadzone,RoboMap.bNonLinearInput)
                 );
         power_2 = Functions.MecDrive_LeftFront(
-                Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
+                dChasisScale*Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
+                dChasisScale*Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
                 Functions.stickMod(gamepad1_Z,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
                 Functions.stickMod(gamepad1_W,RoboMap.bDeadzone,RoboMap.bNonLinearInput)
         );
         power_3 = Functions.MecDrive_LeftRear(
-                Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
+                dChasisScale*Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
+                dChasisScale*Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
                 Functions.stickMod(gamepad1_Z,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
                 Functions.stickMod(gamepad1_W,RoboMap.bDeadzone,RoboMap.bNonLinearInput)
         );
         power_4 = Functions.MecDrive_RightRear(
-                Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
+                dChasisScale*Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
+                dChasisScale*Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
                 Functions.stickMod(gamepad1_Z,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
                 Functions.stickMod(gamepad1_W,RoboMap.bDeadzone,RoboMap.bNonLinearInput)
         );
         //scale output so that power is scaled with maximum of 1
-        trim_max = Math.max(Math.max(Math.max(Math.abs(power_1),Math.abs(power_2)),
-                            Math.max(Math.abs(power_3),Math.abs(power_4))),1);
+        double trim_max = Math.max(Math.max(Math.max(Math.abs(power_1),Math.abs(power_2)),
+                Math.max(Math.abs(power_3),Math.abs(power_4))),1);
         power_1 /= trim_max;
         power_2 /= trim_max;
         power_3 /= trim_max;
@@ -182,45 +185,38 @@ public class TeleOpMode_test extends OpMode
         rightfront.setPower(power_1);
         rightrear.setPower(power_4);
 
-        //chain mapped on button A&B on gamepad
-        double dGeneralChainSpeed = 0.3;
-        double dChainFix_Kp=0.5;
-        double dChainFixAmount=0;//positive means add to the left
-        double dLeftChainSpeed;
-        double dRightChainSpeed;
-        boolean bChainNeedFix = Math.abs(leftChain_Pos-rightChain_Pos)>50?true:false;
-        boolean bChain_Self_Fix = true;
+        //chain mapped on button A&B on gamepad1
+        double dChainSpeed = 0.3;
 
-        //chain fix
-        if(bChainNeedFix){
-            if(leftChain_Pos<rightChain_Pos){
-                dChainFixAmount = Math.abs(leftChain_Pos-rightChain_Pos)*
-                        dChainFix_Kp*dGeneralChainSpeed*(1/100);
-            }else{
-                dChainFixAmount = -Math.abs(leftChain_Pos-rightChain_Pos)*
-                        dChainFix_Kp*dGeneralChainSpeed*(1/100);
+        if (Math.abs(leftChain_Pos-rightChain_Pos)>50) {
+            leftChain.setTargetPosition((leftChain_Pos+rightChain_Pos)/2);
+            leftChain.setPower(dChainSpeed);
+            rightChain.setTargetPosition((leftChain_Pos+rightChain_Pos)/2);
+            rightChain.setPower(dChainSpeed);
+        }
+        else {
+            if (gamepad1_a) {
+                Chain_exp = leftChain_Pos + 100;
+                leftChain.setTargetPosition(Chain_exp);
+                leftChain.setPower(dChainSpeed);
+                rightChain.setTargetPosition(Chain_exp);
+                rightChain.setPower(dChainSpeed);
+
+            }
+            else if (gamepad1_b) {
+                Chain_exp = leftChain_Pos - 100;
+                leftChain.setTargetPosition(Chain_exp);
+                leftChain.setPower(dChainSpeed);
+                rightChain.setTargetPosition(Chain_exp);
+                rightChain.setPower(dChainSpeed);
+            }
+            else {
+                leftChain.setTargetPosition(Chain_exp);
+                leftChain.setPower(dChainSpeed);
+                rightChain.setTargetPosition(Chain_exp);
+                rightChain.setPower(dChainSpeed);
             }
         }
-
-        if (gamepad1_a) {//forward
-            dLeftChainSpeed = dGeneralChainSpeed+dChainFixAmount;
-            dRightChainSpeed = dGeneralChainSpeed-dChainFixAmount;
-        }else if (gamepad1_b) {//backward
-            dLeftChainSpeed = -dGeneralChainSpeed+dChainFixAmount;
-            dRightChainSpeed = -dGeneralChainSpeed-dChainFixAmount;
-        }else if(bChain_Self_Fix){//self fix
-            dLeftChainSpeed = dChainFixAmount;
-            dRightChainSpeed = dChainFixAmount;
-        }else{//no self fix
-            dLeftChainSpeed = 0;
-            dRightChainSpeed = 0;
-        }
-
-        leftChain.setPower(dLeftChainSpeed);
-        rightChain.setPower(dRightChainSpeed);
-        telemetry.addData("LeftChain:","Pos (%.2f), Speed (%.2f)",leftChain_Pos,dLeftChainSpeed);
-        telemetry.addData("RightChain:","Pos (%.2f), Speed (%.2f)",rightChain_Pos,dRightChainSpeed);
-
 
         //CRServos
 
@@ -263,7 +259,7 @@ public class TeleOpMode_test extends OpMode
         //put data into dashboard
         telemetry.addData("Config_Main_Timer", "Run Time: " + timer.toString());
         telemetry.addData("Config_trim",trim_max);
-         //telemetry.addData("gamepad1.atRest()",gamepad1.atRest());
+        //telemetry.addData("gamepad1.atRest()",gamepad1.atRest());
         telemetry.addData("Config_gamepad1.Input","LX (%.2f), LY (%.2f), RX (%.2f), RY (%.2f)",
                 gamepad1_X,gamepad1_Y,gamepad1_Z,gamepad1_W);
         telemetry.addData("Config_MotorPower","1 (%.2f), 2 (%.2f), 3 (%.2f),4 (%.2f)",

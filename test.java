@@ -52,7 +52,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name="test", group="Iterative Opmode")
-
+@Disabled
 public class test extends OpMode
 {
     // Declare OpMode members.
