@@ -165,15 +165,14 @@ public class TeleOpMode_MainCar extends OpMode
         }
         else {
             if (gamepad1_a) {
-                Chain_exp = leftChain_Pos + 200;
+                Chain_exp = leftChain_Pos - 200;
                 leftChain.setTargetPosition(Chain_exp);
                 leftChain.setPower(dChainSpeed);
                 rightChain.setTargetPosition(Chain_exp);
                 rightChain.setPower(dChainSpeed);
-
             }
             else if (gamepad1_b) {
-                Chain_exp = leftChain_Pos - 200;
+                Chain_exp = leftChain_Pos + 200;
                 leftChain.setTargetPosition(Chain_exp);
                 leftChain.setPower(dChainSpeed);
                 rightChain.setTargetPosition(Chain_exp);
