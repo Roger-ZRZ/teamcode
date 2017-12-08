@@ -31,9 +31,6 @@ public class TeleOpMode_StringCar extends OpMode
 
     boolean []gamepad1_stat = new boolean[14];
 
-    boolean flag1 = false;
-    boolean flag2 = false;
-
     @Override
     public void init() {
         //Print
@@ -44,16 +41,21 @@ public class TeleOpMode_StringCar extends OpMode
         rightfront = hardwareMap.get(DcMotor.class, "motor1");
         leftrear = hardwareMap.get(DcMotor.class, "motor3");
         rightrear = hardwareMap.get(DcMotor.class,"motor4");
-        //leftMotor = hardwareMap.get(DcMotor.class, "motorl");
-        //rightMotor = hardwareMap.get(DcMotor.class, "motorr");
+        leftMotor = hardwareMap.get(DcMotor.class, "leftmotor");
+        rightMotor = hardwareMap.get(DcMotor.class, "rightmotor");
+        leftServo = hardwareMap.get(Servo.class, "leftservo");
+        rightServo = hardwareMap.get(Servo.class, "rightservo");
+        frontServo = hardwareMap.get(Servo.class, "frontservo");
 
         //set motor direction
         leftfront.setDirection(DcMotor.Direction.REVERSE);
         leftrear.setDirection(DcMotor.Direction.REVERSE);
         rightfront.setDirection(DcMotor.Direction.FORWARD);
         rightrear.setDirection(DcMotor.Direction.FORWARD);
-        //leftMotor.setDirection(DcMotor.Direction.FORWARD);
-        //rightMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftMotor.setDirection(DcMotor.Direction.FORWARD);
+        rightMotor.setDirection(DcMotor.Direction.REVERSE);
+            //todo servo direction and range
+
 
         for(int i=0;i<gamepad1_stat.length;i++){
             gamepad1_stat[i] = false;
@@ -89,7 +91,7 @@ public class TeleOpMode_StringCar extends OpMode
         double gamepad1_X = -gamepad1.left_stick_x; //leftX
         double gamepad1_Y = gamepad1.left_stick_y; //leftY
         double gamepad1_Z = gamepad1.right_stick_x; //RightX
-        double gamepad1_W = -gamepad1.right_stick_y; //RightY
+        double gamepad1_W = gamepad1.right_stick_y; //RightY
 
         //power raw
         power_1 = Functions.MecDrive_RightFront(
@@ -130,7 +132,7 @@ public class TeleOpMode_StringCar extends OpMode
         rightfront.setPower(power_1);
         rightrear.setPower(power_4);
 
-        /*/***Lifters***
+        /***Lifters***/
 
         //gamepad1.a press and repress
         if(gamepad1.a&&!gamepad1_stat[0]){
@@ -147,8 +149,8 @@ public class TeleOpMode_StringCar extends OpMode
         }else{}
 
         //gamepad1.b press and repress
-        if(gamepad1.a&&!gamepad1_stat[0]){
-            gamepad1_stat[0] = true;
+        if(gamepad1.b&&!gamepad1_stat[0]){
+            gamepad1_stat[1] = true;
             if(leftMotor.getPower()!=0){
                 leftMotor.setPower(0);
                 rightMotor.setPower(0);
@@ -156,20 +158,26 @@ public class TeleOpMode_StringCar extends OpMode
                 leftMotor.setPower(-0.3);
                 rightMotor.setPower(-0.3);
             }
-        }else if(!gamepad1.a){
-            gamepad1_stat[0] = false;
+        }else if(!gamepad1.b){
+            gamepad1_stat[1] = false;
         }else{}
+
 
         //experimental
         if(gamepad1.x){
             leftServo.setPosition(1);
             rightServo.setPosition(1);
+        }else{
+            //todo set for closed position
+            //leftServo.setPosition(1);
+            //rightServo.setPosition(1);
         }
-        //experimental
+
+        //only experimental
         if(gamepad1.y){
-            leftServo.setPosition(0);
-            rightServo.setPosition(0);
-        }*/
+            leftServo.setPosition(0.5);
+            rightServo.setPosition(0.5);
+        }/**/
 
 
 
