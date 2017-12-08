@@ -131,8 +131,8 @@ public class TeleOpMode_MainCar extends OpMode
         boolean gamepad1_b = gamepad1.b;
         boolean gamepad1_x = gamepad1.x;
         boolean gamepad1_y = gamepad1.y;
-        double f_gamepad1_servo = gamepad1.right_trigger;
-        double b_gamepad1_servo = gamepad1.left_trigger;
+        double f_gamepad1_servo = 1-gamepad1.right_trigger;
+        double b_gamepad1_servo = 1-gamepad1.left_trigger;
         boolean gamepad1_arm_l = gamepad1.left_bumper;
         boolean gamepad1_arm_r = gamepad1.right_bumper;
         boolean gamepad1_arm_servo1_u = gamepad1.dpad_up;
@@ -165,7 +165,7 @@ public class TeleOpMode_MainCar extends OpMode
         }
         else {
             if (gamepad1_a) {
-                Chain_exp = leftChain_Pos + 100;
+                Chain_exp = leftChain_Pos + 200;
                 leftChain.setTargetPosition(Chain_exp);
                 leftChain.setPower(dChainSpeed);
                 rightChain.setTargetPosition(Chain_exp);
@@ -173,7 +173,7 @@ public class TeleOpMode_MainCar extends OpMode
 
             }
             else if (gamepad1_b) {
-                Chain_exp = leftChain_Pos - 100;
+                Chain_exp = leftChain_Pos - 200;
                 leftChain.setTargetPosition(Chain_exp);
                 leftChain.setPower(dChainSpeed);
                 rightChain.setTargetPosition(Chain_exp);
@@ -205,7 +205,7 @@ public class TeleOpMode_MainCar extends OpMode
         //Claw Servos
 
         f_clawServo.setPosition(f_gamepad1_servo);
-        b_clawServo.setPosition(-b_gamepad1_servo);
+        b_clawServo.setPosition(b_gamepad1_servo);
 
         telemetry.addData("f_claw_pos:",f_clawServo.getPosition());
         telemetry.addData("b_claw_pos:",b_clawServo.getPosition());
