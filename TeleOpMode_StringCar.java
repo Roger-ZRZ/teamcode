@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="TeleOpMode_StringCar", group="Iterative Opmode")
-@Disabled
+
 public class TeleOpMode_StringCar extends OpMode
 {
     
@@ -31,24 +31,29 @@ public class TeleOpMode_StringCar extends OpMode
 
     boolean []gamepad1_stat = new boolean[14];
 
+    boolean flag1 = false;
+    boolean flag2 = false;
+
     @Override
     public void init() {
         //Print
         telemetry.addData("Status", "init() Running");
         telemetry.update();
         //initiating motors (Normal)
-        leftfront  = hardwareMap.get(DcMotor.class, "l_f");
-        rightfront = hardwareMap.get(DcMotor.class, "r_f");
-        leftrear = hardwareMap.get(DcMotor.class, "l_b");
-        rightrear = hardwareMap.get(DcMotor.class,"r_b");
+        leftfront  = hardwareMap.get(DcMotor.class, "motor2");
+        rightfront = hardwareMap.get(DcMotor.class, "motor1");
+        leftrear = hardwareMap.get(DcMotor.class, "motor3");
+        rightrear = hardwareMap.get(DcMotor.class,"motor4");
+        //leftMotor = hardwareMap.get(DcMotor.class, "motorl");
+        //rightMotor = hardwareMap.get(DcMotor.class, "motorr");
 
         //set motor direction
-        leftfront.setDirection(DcMotor.Direction.FORWARD);
-        leftrear.setDirection(DcMotor.Direction.FORWARD);
-        rightfront.setDirection(DcMotor.Direction.REVERSE);
-        rightrear.setDirection(DcMotor.Direction.REVERSE);
-        leftMotor.setDirection(DcMotor.Direction.FORWARD);
-        rightMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftfront.setDirection(DcMotor.Direction.REVERSE);
+        leftrear.setDirection(DcMotor.Direction.REVERSE);
+        rightfront.setDirection(DcMotor.Direction.FORWARD);
+        rightrear.setDirection(DcMotor.Direction.FORWARD);
+        //leftMotor.setDirection(DcMotor.Direction.FORWARD);
+        //rightMotor.setDirection(DcMotor.Direction.REVERSE);
 
         for(int i=0;i<gamepad1_stat.length;i++){
             gamepad1_stat[i] = false;
@@ -81,8 +86,8 @@ public class TeleOpMode_StringCar extends OpMode
         double power_4;
         double trim_max;
         //raw stick input (Reverse both Y axis)
-        double gamepad1_X = gamepad1.left_stick_x; //leftX
-        double gamepad1_Y = -gamepad1.left_stick_y; //leftY
+        double gamepad1_X = -gamepad1.left_stick_x; //leftX
+        double gamepad1_Y = gamepad1.left_stick_y; //leftY
         double gamepad1_Z = gamepad1.right_stick_x; //RightX
         double gamepad1_W = -gamepad1.right_stick_y; //RightY
 
@@ -125,7 +130,8 @@ public class TeleOpMode_StringCar extends OpMode
         rightfront.setPower(power_1);
         rightrear.setPower(power_4);
 
-        /***Lifters***/
+        /*/***Lifters***
+
         //gamepad1.a press and repress
         if(gamepad1.a&&!gamepad1_stat[0]){
             gamepad1_stat[0] = true;
@@ -163,7 +169,7 @@ public class TeleOpMode_StringCar extends OpMode
         if(gamepad1.y){
             leftServo.setPosition(0);
             rightServo.setPosition(0);
-        }
+        }*/
 
 
 
@@ -186,8 +192,8 @@ public class TeleOpMode_StringCar extends OpMode
         leftrear.setPower(0);
         rightfront.setPower(0);
         rightrear.setPower(0);
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
+        //leftMotor.setPower(0);
+        //rightMotor.setPower(0);
         telemetry.clearAll();
         telemetry.addData("Status","Stop Enforced");
         telemetry.update();

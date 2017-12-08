@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name="AutonomousMode", group="Linear Opmode")
-@Disabled
+
 public class AutonomousMode_PID_Test extends LinearOpMode {
 
     private DcMotor leftfront;
@@ -27,10 +27,10 @@ public class AutonomousMode_PID_Test extends LinearOpMode {
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         //Hardware initiate
-        leftfront  = hardwareMap.get(DcMotor.class, "motor2");
-        rightfront = hardwareMap.get(DcMotor.class, "motor1");
-        leftrear = hardwareMap.get(DcMotor.class, "motor3");
-        rightrear = hardwareMap.get(DcMotor.class,"motor4");
+        leftfront  = hardwareMap.get(DcMotor.class, "l_f");
+        rightfront = hardwareMap.get(DcMotor.class, "r_b");
+        leftrear = hardwareMap.get(DcMotor.class, "l_b");
+        rightrear = hardwareMap.get(DcMotor.class,"r_b");
         gyro = hardwareMap.get(ModernRoboticsI2cGyro.class,"gyro");
 
         //set motors direction
