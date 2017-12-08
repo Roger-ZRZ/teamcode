@@ -127,10 +127,6 @@ public class TeleOpMode_MainCar extends OpMode
         double power_3;
         double power_4;
         //raw stick input (Reverse both Y axis)
-        double gamepad1_X = gamepad1.left_stick_x; //leftX
-        double gamepad1_Y = -gamepad1.left_stick_y; //leftY
-        double gamepad1_Z = gamepad1.right_stick_x; //RightX
-        double gamepad1_W = -gamepad1.right_stick_y; //RightY
         boolean gamepad1_a = gamepad1.a;
         boolean gamepad1_b = gamepad1.b;
         boolean gamepad1_x = gamepad1.x;
@@ -144,46 +140,19 @@ public class TeleOpMode_MainCar extends OpMode
         boolean gamepad1_arm_servo2_l = gamepad1.dpad_left;
         boolean gamepad1_arm_servo2_r = gamepad1.dpad_right;
 
-        //power raw
-        double dChasisScale = Math.pow(Math.hypot(gamepad1_X,gamepad1_Y),2);
 
-        power_1 =Functions.MecDrive_RightFront(
-                dChasisScale*Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                dChasisScale*Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_Z,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_W,RoboMap.bDeadzone,RoboMap.bNonLinearInput)
-                );
-        power_2 = Functions.MecDrive_LeftFront(
-                dChasisScale*Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                dChasisScale*Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_Z,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_W,RoboMap.bDeadzone,RoboMap.bNonLinearInput)
-        );
-        power_3 = Functions.MecDrive_LeftRear(
-                dChasisScale*Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                dChasisScale*Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_Z,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_W,RoboMap.bDeadzone,RoboMap.bNonLinearInput)
-        );
-        power_4 = Functions.MecDrive_RightRear(
-                dChasisScale*Functions.stickMod(gamepad1_X,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                dChasisScale*Functions.stickMod(gamepad1_Y,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_Z,RoboMap.bDeadzone,RoboMap.bNonLinearInput),
-                Functions.stickMod(gamepad1_W,RoboMap.bDeadzone,RoboMap.bNonLinearInput)
-        );
-        //scale output so that power is scaled with maximum of 1
-        double trim_max = Math.max(Math.max(Math.max(Math.abs(power_1),Math.abs(power_2)),
-                Math.max(Math.abs(power_3),Math.abs(power_4))),1);
-        power_1 /= trim_max;
-        power_2 /= trim_max;
-        power_3 /= trim_max;
-        power_4 /= trim_max;
+        double r = Math.hypot(-gamepad1.left_stick_x, gamepad1.left_stick_y);
+        double robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
+        double rightX = gamepad1.right_stick_x;
+        final double v1 = r * Math.cos(robotAngle) + rightX;
+        final double v2 = r * Math.sin(robotAngle) - rightX;
+        final double v3 = r * Math.sin(robotAngle) + rightX;
+        final double v4 = r * Math.cos(robotAngle) - rightX;
 
-        //set motor power
-        leftfront.setPower(power_2);
-        leftrear.setPower(power_3);
-        rightfront.setPower(power_1);
-        rightrear.setPower(power_4);
+        leftfront.setPower(v1);
+        rightfront.setPower(v2);
+        leftrear.setPower(v3);
+        rightrear.setPower(v4);
 
         //chain mapped on button A&B on gamepad1
         double dChainSpeed = 0.3;
@@ -258,12 +227,8 @@ public class TeleOpMode_MainCar extends OpMode
 
         //put data into dashboard
         telemetry.addData("Config_Main_Timer", "Run Time: " + timer.toString());
-        telemetry.addData("Config_trim",trim_max);
-        //telemetry.addData("gamepad1.atRest()",gamepad1.atRest());
-        telemetry.addData("Config_gamepad1.Input","LX (%.2f), LY (%.2f), RX (%.2f), RY (%.2f)",
-                gamepad1_X,gamepad1_Y,gamepad1_Z,gamepad1_W);
         telemetry.addData("Config_MotorPower","1 (%.2f), 2 (%.2f), 3 (%.2f),4 (%.2f)",
-                power_1,power_2,power_3,power_4);
+                v1,v2,v3,v4);
 
     }
 
