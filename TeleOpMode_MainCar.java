@@ -87,8 +87,8 @@ public class TeleOpMode_MainCar extends OpMode
         arm_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        f_clawServo.scaleRange(0.4,0.7);
-        b_clawServo.scaleRange(0.4,0.7);
+        f_clawServo.scaleRange(0.3,0.9);
+        b_clawServo.scaleRange(0.4,0.9);
         telemetry.addData("F_claw POS",f_clawServo.getPosition());
         telemetry.addData("B_claw POS",b_clawServo.getPosition());
 
@@ -132,7 +132,7 @@ public class TeleOpMode_MainCar extends OpMode
         boolean gamepad1_x = gamepad1.x;
         boolean gamepad1_y = gamepad1.y;
         double f_gamepad1_servo = 1-gamepad1.right_trigger;
-        double b_gamepad1_servo = 1-gamepad1.left_trigger;
+        double b_gamepad1_servo = gamepad1.left_trigger;
         boolean gamepad1_arm_l = gamepad1.left_bumper;
         boolean gamepad1_arm_r = gamepad1.right_bumper;
         boolean gamepad1_arm_servo1_u = gamepad1.dpad_up;
