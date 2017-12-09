@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name="AutonomousMode", group="Linear Opmode")
-
+@Disabled
 public class AutonomousMode_PID_Test extends LinearOpMode {
 
     private DcMotor leftfront;

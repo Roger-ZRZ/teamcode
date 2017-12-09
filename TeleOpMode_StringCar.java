@@ -21,13 +21,13 @@ public class TeleOpMode_StringCar extends OpMode
     private DcMotor rightfront;
     private DcMotor leftrear;
     private DcMotor rightrear;
-    private DcMotor leftMotor;
+    /*private DcMotor leftMotor;
     private DcMotor rightMotor;
 
     //Servos
     private Servo leftServo;
     private Servo rightServo;
-    private Servo frontServo;
+    private Servo frontServo;*/
 
     boolean []gamepad1_stat = new boolean[14];
 
@@ -41,19 +41,19 @@ public class TeleOpMode_StringCar extends OpMode
         rightfront = hardwareMap.get(DcMotor.class, "motor1");
         leftrear = hardwareMap.get(DcMotor.class, "motor3");
         rightrear = hardwareMap.get(DcMotor.class,"motor4");
-        leftMotor = hardwareMap.get(DcMotor.class, "leftmotor");
+        /*leftMotor = hardwareMap.get(DcMotor.class, "leftmotor");
         rightMotor = hardwareMap.get(DcMotor.class, "rightmotor");
         leftServo = hardwareMap.get(Servo.class, "leftservo");
         rightServo = hardwareMap.get(Servo.class, "rightservo");
-        frontServo = hardwareMap.get(Servo.class, "frontservo");
+        frontServo = hardwareMap.get(Servo.class, "frontservo");*/
 
         //set motor direction
         leftfront.setDirection(DcMotor.Direction.REVERSE);
         leftrear.setDirection(DcMotor.Direction.REVERSE);
         rightfront.setDirection(DcMotor.Direction.FORWARD);
         rightrear.setDirection(DcMotor.Direction.FORWARD);
-        leftMotor.setDirection(DcMotor.Direction.FORWARD);
-        rightMotor.setDirection(DcMotor.Direction.REVERSE);
+        /*leftMotor.setDirection(DcMotor.Direction.FORWARD);
+        rightMotor.setDirection(DcMotor.Direction.REVERSE);*/
             //todo servo direction and range
 
 
@@ -88,10 +88,10 @@ public class TeleOpMode_StringCar extends OpMode
         double power_4;
         double trim_max;
         //raw stick input (Reverse both Y axis)
-        double gamepad1_X = -gamepad1.left_stick_x; //leftX
-        double gamepad1_Y = gamepad1.left_stick_y; //leftY
+        double gamepad1_X = gamepad1.left_stick_x; //leftX
+        double gamepad1_Y = -gamepad1.left_stick_y; //leftY
         double gamepad1_Z = gamepad1.right_stick_x; //RightX
-        double gamepad1_W = gamepad1.right_stick_y; //RightY
+        double gamepad1_W = -gamepad1.right_stick_y; //RightY
 
         //power raw
         power_1 = Functions.MecDrive_RightFront(
@@ -132,7 +132,7 @@ public class TeleOpMode_StringCar extends OpMode
         rightfront.setPower(power_1);
         rightrear.setPower(power_4);
 
-        /***Lifters***/
+        /***Lifters***
 
         //gamepad1.a press and repress
         if(gamepad1.a&&!gamepad1_stat[0]){
