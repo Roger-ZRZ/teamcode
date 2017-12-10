@@ -56,6 +56,11 @@ public class TeleOpMode_StringCar extends OpMode
         rightMotor.setDirection(DcMotor.Direction.REVERSE);*/
             //todo servo direction and range
 
+        leftfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         for(int i=0;i<gamepad1_stat.length;i++){
             gamepad1_stat[i] = false;
