@@ -87,8 +87,13 @@ public class TeleOpMode_MainCar extends OpMode
         arm_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        f_clawServo.scaleRange(0.3,0.9);
-        b_clawServo.scaleRange(0.4,0.9);
+        rightfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        f_clawServo.scaleRange(0.3,1);
+        b_clawServo.scaleRange(0.4,1);
         telemetry.addData("F_claw POS",f_clawServo.getPosition());
         telemetry.addData("B_claw POS",b_clawServo.getPosition());
 
@@ -127,18 +132,18 @@ public class TeleOpMode_MainCar extends OpMode
         double power_3;
         double power_4;
         //raw stick input (Reverse both Y axis)
-        boolean gamepad1_a = gamepad1.a;
-        boolean gamepad1_b = gamepad1.b;
-        boolean gamepad1_x = gamepad1.x;
-        boolean gamepad1_y = gamepad1.y;
-        double f_gamepad1_servo = 1-gamepad1.right_trigger;
-        double b_gamepad1_servo = gamepad1.left_trigger;
-        boolean gamepad1_arm_l = gamepad1.left_bumper;
-        boolean gamepad1_arm_r = gamepad1.right_bumper;
-        boolean gamepad1_arm_servo1_u = gamepad1.dpad_up;
-        boolean gamepad1_arm_servo1_d = gamepad1.dpad_down;
-        boolean gamepad1_arm_servo2_l = gamepad1.dpad_left;
-        boolean gamepad1_arm_servo2_r = gamepad1.dpad_right;
+        boolean gamepad2_a = gamepad2.a;
+        boolean gamepad2_b = gamepad2.b;
+        boolean gamepad2_x = gamepad2.x;
+        boolean gamepad2_y = gamepad2.y;
+        double f_gamepad1_servo = 1-gamepad2.right_trigger;
+        double b_gamepad1_servo = gamepad2.left_trigger;
+        boolean gamepad1_arm_l = gamepad2.left_bumper;
+        boolean gamepad1_arm_r = gamepad2.right_bumper;
+        boolean gamepad1_arm_servo1_u = gamepad2.dpad_up;
+        boolean gamepad1_arm_servo1_d = gamepad2.dpad_down;
+        boolean gamepad1_arm_servo2_l = gamepad2.dpad_left;
+        boolean gamepad1_arm_servo2_r = gamepad2.dpad_right;
 
 
         double r = Math.hypot(-gamepad1.left_stick_x, gamepad1.left_stick_y);
@@ -154,6 +159,11 @@ public class TeleOpMode_MainCar extends OpMode
         leftrear.setPower(v3);
         rightrear.setPower(v4);
 
+        telemetry.addData("leftfront:",v1);
+        telemetry.addData("rightfront:",v2);
+        telemetry.addData("leftrear:",v3);
+        telemetry.addData("rightrear:",v4);
+
         //chain mapped on button A&B on gamepad1
         double dChainSpeed = 0.3;
 
@@ -163,15 +173,19 @@ public class TeleOpMode_MainCar extends OpMode
             rightChain.setTargetPosition((leftChain_Pos+rightChain_Pos)/2);
             rightChain.setPower(dChainSpeed);
         }
+        else if (Math.abs(leftChain_Pos-rightChain_Pos)<10 && !gamepad2_a && !gamepad2_b){
+            leftChain.setPower(0);
+            rightChain.setPower(0);
+        }
         else {
-            if (gamepad1_a) {
+            if (gamepad2_a) {
                 Chain_exp = leftChain_Pos - 200;
                 leftChain.setTargetPosition(Chain_exp);
                 leftChain.setPower(dChainSpeed);
                 rightChain.setTargetPosition(Chain_exp);
                 rightChain.setPower(dChainSpeed);
             }
-            else if (gamepad1_b) {
+            else if (gamepad2_b) {
                 Chain_exp = leftChain_Pos + 200;
                 leftChain.setTargetPosition(Chain_exp);
                 leftChain.setPower(dChainSpeed);
@@ -188,11 +202,11 @@ public class TeleOpMode_MainCar extends OpMode
 
         //CRServos
 
-        if (gamepad1_x) {
+        if (gamepad2_x) {
             left_wheel.setPower(1);
             right_wheel.setPower(1);
         }
-        else if (gamepad1_y) {
+        else if (gamepad2_y) {
             left_wheel.setPower(-1);
             right_wheel.setPower(-1);
         }

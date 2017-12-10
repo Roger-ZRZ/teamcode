@@ -20,7 +20,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 @Autonomous(name="VuMark_Autonomous", group ="Visual_Processing")
-@Disabled
+//@Disabled
 public class VuMark_Autonomous extends LinearOpMode {
     //initiate camera
     OpenGLMatrix lastLocation = null;
