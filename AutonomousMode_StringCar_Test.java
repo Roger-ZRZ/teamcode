@@ -20,7 +20,7 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
     //private DcMotor leftMotor;
     //private DcMotor rightMotor;
 
-    //private ModernRoboticsI2cGyro gyro;
+    private ModernRoboticsI2cGyro gyro;
     private ColorSensor colorSensor;
 
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
@@ -147,6 +147,7 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
 
         sleep(1000);
         analogRun(0,0.5,0,1.5);
+
 
 
 
