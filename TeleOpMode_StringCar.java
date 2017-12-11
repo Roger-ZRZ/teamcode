@@ -21,13 +21,13 @@ public class TeleOpMode_StringCar extends OpMode
     private DcMotor rightfront;
     private DcMotor leftrear;
     private DcMotor rightrear;
-    /*private DcMotor leftMotor;
+    private DcMotor leftMotor;
     private DcMotor rightMotor;
 
     //Servos
     private Servo leftServo;
     private Servo rightServo;
-    private Servo frontServo;*/
+    private Servo frontServo;
 
     boolean []gamepad1_stat = new boolean[14];
 
@@ -41,20 +41,21 @@ public class TeleOpMode_StringCar extends OpMode
         rightfront = hardwareMap.get(DcMotor.class, "motor1");
         leftrear = hardwareMap.get(DcMotor.class, "motor3");
         rightrear = hardwareMap.get(DcMotor.class,"motor4");
-        /*leftMotor = hardwareMap.get(DcMotor.class, "leftmotor");
+        leftMotor = hardwareMap.get(DcMotor.class, "leftmotor");
         rightMotor = hardwareMap.get(DcMotor.class, "rightmotor");
         leftServo = hardwareMap.get(Servo.class, "leftservo");
         rightServo = hardwareMap.get(Servo.class, "rightservo");
-        frontServo = hardwareMap.get(Servo.class, "frontservo");*/
+        frontServo = hardwareMap.get(Servo.class, "frontservo");
 
         //set motor direction
         leftfront.setDirection(DcMotor.Direction.REVERSE);
         leftrear.setDirection(DcMotor.Direction.REVERSE);
         rightfront.setDirection(DcMotor.Direction.FORWARD);
         rightrear.setDirection(DcMotor.Direction.FORWARD);
-        /*leftMotor.setDirection(DcMotor.Direction.FORWARD);
-        rightMotor.setDirection(DcMotor.Direction.REVERSE);*/
-            //todo servo direction and range
+        leftMotor.setDirection(DcMotor.Direction.FORWARD);
+        rightMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftServo.setDirection(Servo.Direction.REVERSE);
+        rightServo.setDirection(Servo.Direction.FORWARD);
 
         leftfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -137,9 +138,9 @@ public class TeleOpMode_StringCar extends OpMode
         rightfront.setPower(power_1);
         rightrear.setPower(power_4);
 
-        /***Lifters***
+        /***Lifters***/
 
-        //gamepad1.a press and repress
+        /*//gamepad1.a press and repress
         if(gamepad1.a&&!gamepad1_stat[0]){
             gamepad1_stat[0] = true;
             if(leftMotor.getPower()!=0){
@@ -165,24 +166,40 @@ public class TeleOpMode_StringCar extends OpMode
             }
         }else if(!gamepad1.b){
             gamepad1_stat[1] = false;
-        }else{}
+        }else{}*/
+        if(gamepad1.a){
+            leftMotor.setPower(-1);
+            rightMotor.setPower(-1);
+        }else{
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
+        }
+
+        if(gamepad1.b){
+            leftMotor.setPower(1);
+            rightMotor.setPower(1);
+        }else{
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
+        }
 
 
         //experimental
-        if(gamepad1.x){
-            leftServo.setPosition(1);
-            rightServo.setPosition(1);
-        }else{
-            //todo set for closed position
-            //leftServo.setPosition(1);
-            //rightServo.setPosition(1);
-        }
+        if(gamepad1.x&&!gamepad1_stat[0]){
+            gamepad1_stat[0] = true;
+            if(leftServo.getPosition()!=0){
+                leftServo.setPosition(0);
+                rightServo.setPosition(0);
+            }else{
+                leftServo.setPosition(0.4);
+                rightServo.setPosition(0.4);
+            }
+        }else if(!gamepad1.x){
+            gamepad1_stat[0] = false;
+        }else{}
 
-        //only experimental
-        if(gamepad1.y){
-            leftServo.setPosition(0.5);
-            rightServo.setPosition(0.5);
-        }/**/
+
+        frontServo.setPosition(1);
 
 
 
