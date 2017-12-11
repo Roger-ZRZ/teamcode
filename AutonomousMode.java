@@ -7,6 +7,19 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.robotcore.external.navigation.VuMarkInstanceId;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 @Autonomous(name="AutonomousMode", group="Linear Opmode")
 public class AutonomousMode extends LinearOpMode {
 
@@ -37,8 +50,23 @@ public class AutonomousMode extends LinearOpMode {
 
     public int Chain_exp = 0;
 
+    OpenGLMatrix lastLocation = null;
+    VuforiaLocalizer vuforia;
+
     @Override
     public void runOpMode() {
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().
+                getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        parameters.vuforiaLicenseKey = "Aa0j2YP/////AAAAGXZzc6vdBEenpsPVBhCR0pSDbh2nSbP0woFsOeeEcaSHmhsulEXzgAGFlGQWX/qWCqHMkq7YMGtFasFlq2RnXiFc0uUQ4XLQElRYxlSsb/Prtgt/dmrtE1ENUZBdqMq3kyE4766IAvtxTVf73erfyf0hv2IDlM/i785yySkOWUol40yPHB/x7r//Gn/OGNI6Sgf6RjaAdk702dHpE2qiE/JLRIj0XiTnZoFLgvuNcWcbJW89G6tzrYBuW+2ExZ2qW8yhB/QY8ZKl0UFi7dSPa09Zud+os8h9O+oEj+fi1S6sVK18BK7nXJQgOTpV/0UO5FPkIi1hsmZD6dlSnPbvhpQfYEJbVMc1829WOxkopAg7";
+        //setup back camera
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        //import asset "Relic Vumarks"
+        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        VuforiaTrackable relicTemplate = relicTrackables.get(0);
+        relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
+
         //Print
         telemetry.addData("Status", "init() Running");
         telemetry.update();
@@ -112,8 +140,17 @@ public class AutonomousMode extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
+        relicTrackables.activate();
 
         while (opModeIsActive()) {
+            //Detect Pattern
+            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
+                //put it on dashboard
+                telemetry.addData("VuMark", "%s visible", vuMark);
+            }
+
+            //Detect Color
             int iColor = 0;
             double dRed = colorSensor.red();
             double dBlue = colorSensor.blue();
@@ -128,22 +165,24 @@ public class AutonomousMode extends LinearOpMode {
                 iColor = 0;
                 telemetry.addData("No Color",iColor);
             }
-            /*
+
+            //Move and Place
+
             rightfront.setPower(0.5);
             rightrear.setPower(0.5);
             leftfront.setPower(0.5);
             leftrear.setPower(0.5);
 
-            rightfront.setTargetPosition(5000);
-            rightrear.setTargetPosition(5000);
-            leftfront.setTargetPosition(5000);
-            leftrear.setTargetPosition(5000);
-            */
+            rightfront.setTargetPosition(2000);
+            rightrear.setTargetPosition(2000);
+            leftfront.setTargetPosition(2000);
+            leftrear.setTargetPosition(2000);
+
 
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + timer.toString());
-            telemetry.addData("Motors", "left (%d), right (%d)", leftfront.getCurrentPosition(), rightfront.getCurrentPosition());
+            telemetry.addData("Motors", "leftfront (%d), leftrear (%d), rightfront (%d), rightrear (%d)", leftfront.getCurrentPosition(), leftrear.getCurrentPosition(), rightfront.getCurrentPosition(), rightrear.getCurrentPosition());
             telemetry.update();
         }
     }
