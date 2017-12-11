@@ -8,6 +8,22 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.vuforia.VuMarkTemplate;
+
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+
+import java.util.concurrent.TimeUnit;
 
 @Autonomous(name="AutonomousMode_StringCar_Test", group="Linear Opmode")
 
@@ -20,19 +36,25 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
     //private DcMotor leftMotor;
     //private DcMotor rightMotor;
 
+    //initiate sensory input method
     private ModernRoboticsI2cGyro gyro;
     private ColorSensor colorSensor;
-
+    //initiate camera
+    OpenGLMatrix lastLocation = null;
+    VuforiaLocalizer vuforia;
+    //open timer
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
+    //def config booleans
+    private final boolean isRedAlliance = true;
     private final boolean useGyro = false;
     private final boolean useColor = true;
-    private final boolean isRedAlliance = true;
+    //private final boolean useCamera = true;
+    private final boolean useEncoder = true;
 
     @Override
     public void runOpMode() {
         /***Hardware initiate***/
-
         //initiating motors (Normal)
         leftfront  = hardwareMap.get(DcMotor.class, "motor2");
         rightfront = hardwareMap.get(DcMotor.class, "motor1");
@@ -48,6 +70,22 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
         rightrear.setDirection(DcMotor.Direction.FORWARD);
         //leftMotor.setDirection(DcMotor.Direction.FORWARD);
         //rightMotor.setDirection(DcMotor.Direction.REVERSE);
+
+        //setup camera
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().
+                getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        parameters.vuforiaLicenseKey =
+                "Aa0j2YP/////AAAAGXZzc6vdBEenpsPVBhCR0pSDbh2nSbP0woFsOeeEcaSHmhsulEXzgAGFlGQWX/qWCqHMkq7YMGtFasFlq2RnXiFc0uUQ4XLQElRYxlSsb/Prtgt/dmrtE1ENUZBdqMq3kyE4766IAvtxTVf73erfyf0hv2IDlM/i785yySkOWUol40yPHB/x7r//Gn/OGNI6Sgf6RjaAdk702dHpE2qiE/JLRIj0XiTnZoFLgvuNcWcbJW89G6tzrYBuW+2ExZ2qW8yhB/QY8ZKl0UFi7dSPa09Zud+os8h9O+oEj+fi1S6sVK18BK7nXJQgOTpV/0UO5FPkIi1hsmZD6dlSnPbvhpQfYEJbVMc1829WOxkopAg7";
+        //using back camera on phonr
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        //import asset "Relic Vumarks"
+        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        VuforiaTrackable relicTemplate = relicTrackables.get(0);
+        relicTemplate.setName("relicVuMarkTemplate");
+        telemetry.addData("Camera_Stat", "^_^");
+        telemetry.update();
 
         //calibrate gyro
         /*if(useGyro){
@@ -65,42 +103,36 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
 
         if(useColor){
             colorSensor = hardwareMap.get(ColorSensor.class,"color");
-            telemetry.addData("colorSensor", "^_^");
+            telemetry.addData("ColorSensor", "^_^");
+            telemetry.update();
         }
 
-        //set motor mode
-        leftfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        if(useEncoder){
+            leftfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            telemetry.addData("Encoder_Stat", "^_^");
+            telemetry.update();
+        }
 
-        leftfront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftrear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightrear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightfront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //todo wait for start marker
+        waitForStart();
+        timer.reset();
+        leftfront.setPower(0);
+        leftrear.setPower(0);
+        rightfront.setPower(0);
+        rightrear.setPower(0);
+        //gyro.resetZAxisIntegrator();
+        relicTrackables.activate();
 
-
-        telemetry.addData("Status", "Initialized");
+        //todo Marker config Vumark
+        int vuMark_Marker = vumarkRecog(relicTemplate,2);
+        telemetry.addData("vuMark_Marker",vuMark_Marker);
         telemetry.update();
 
-        //wait for start todo marker
-        waitForStart();
 
-        //reset after start
-        timer.reset();
-            //gyro.resetZAxisIntegrator();
-
-        sleep(1000);
-        //leftfront.setPower(0.2);
-        //leftrear.setPower(0.2);
-        //rightfront.setPower(0.2);
-        //rightrear.setPower(0.2);
-        //analogRun(0.3,0,0,3);
-        //analogRun(0,0.3,0,3);
-        //analogRun(-0.3,-0.3,0,3);
         analogRun(0,-0.5,0,1.5);
-        //autoTurning(-90,5);
-        //autoTurning(90,5);
 
         sleep(1000);
         int iColor=0;
@@ -144,7 +176,6 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
             }else{}
         }
 
-
         sleep(1000);
         analogRun(0,0.5,0,1.5);
 
@@ -156,6 +187,44 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
 
 
     //todo below is the methods that are separated from runable main
+
+    /**
+     * Vumark Scanning
+     */
+    private int vumarkRecog(VuforiaTrackable relicTemplate, int timeOut){
+        int iTemp = 0;
+        ElapsedTime tempTimer = new ElapsedTime();
+        tempTimer.reset();
+        while ((opModeIsActive()&&tempTimer.seconds()<=timeOut)&&(iTemp!=0)) {
+            //get vuMark on every loop
+            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            //if there is anything that is recognizable
+            if(vuMark.equals(RelicRecoveryVuMark.LEFT)){
+                iTemp = 1;
+                telemetry.addData("VuMark", "LEFT");
+                telemetry.update();
+            }else if (vuMark.equals(RelicRecoveryVuMark.CENTER)){
+                iTemp = 2;
+                telemetry.addData("VuMark", "CENTER");
+                telemetry.update();
+            }else if(vuMark.equals(RelicRecoveryVuMark.RIGHT)){
+                iTemp = 3;
+                telemetry.addData("VuMark", "RIGHT");
+                telemetry.update();
+            }else{
+                iTemp = 0;
+                telemetry.addData("VuMark", "not visible");
+                telemetry.update();
+            }
+        }
+        //return marker if expired
+        return iTemp;
+    }
+
+    String format(OpenGLMatrix transformationMatrix) {
+        return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
+    }
+
     /**
      * Runable Speed Time analog run
      */
