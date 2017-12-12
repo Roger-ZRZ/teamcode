@@ -14,7 +14,7 @@ public class RoboMap {
     protected static final boolean bNonLinearInput = false; //non-linear input method
 
     //Mecanum Driving Params - SEE teamcode.Functions
-    protected static final double pZ = 0.75; //right X rotated
+    protected static final double pZ = 1; //right X rotated
     protected static final double pY = 1; //left Y drive
     protected static final double pX = 1; //left X shift
     protected static final double pW = 1; //right Y drive

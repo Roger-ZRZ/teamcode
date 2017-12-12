@@ -48,8 +48,7 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
     //def config booleans
     private final boolean isRedAlliance = true;
     private final boolean useGyro = false;
-    private final boolean useColor = true;
-    //private final boolean useCamera = true;
+    private final boolean useColor = false;
     private final boolean useEncoder = true;
 
     @Override
@@ -131,9 +130,13 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
         telemetry.addData("vuMark_Marker",vuMark_Marker);
         telemetry.update();
 
+        encoderRun(1120,1120,1120,1120,0.8,10,0.25);
+        encoderRun(-1120,1120,-1120,1120,0.8,10,0.25);
+        encoderRun(-1120,1120,1120,-1120,0.8,10,0.25);
 
-        analogRun(0,-0.5,0,1.5);
+        analogRun(0,-0.5,0,0.5);
 
+        /*
         sleep(1000);
         int iColor=0;
 
@@ -178,7 +181,7 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
 
         sleep(1000);
         analogRun(0,0.5,0,1.5);
-
+        */
 
 
 
@@ -193,9 +196,9 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
      */
     private int vumarkRecog(VuforiaTrackable relicTemplate, int timeOut){
         int iTemp = 0;
-        ElapsedTime tempTimer = new ElapsedTime();
-        tempTimer.reset();
-        while ((opModeIsActive()&&tempTimer.seconds()<=timeOut)&&(iTemp!=0)) {
+        ElapsedTime vumarkTimer = new ElapsedTime();
+        vumarkTimer.reset();
+        while ((opModeIsActive()&&vumarkTimer.seconds()<=timeOut)&&(iTemp!=0)) {
             //get vuMark on every loop
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
             //if there is anything that is recognizable
@@ -224,6 +227,50 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
     String format(OpenGLMatrix transformationMatrix) {
         return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
     }
+
+    private void encoderRun(int target1, int target2, int target3, int target4, double speed, double timeOut, double sleepTime){
+        ElapsedTime encoderTimer = new ElapsedTime();
+
+        if(opModeIsActive()){
+            leftfront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftrear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightfront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightrear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            leftfront.setTargetPosition(leftfront.getCurrentPosition()+target2);
+            leftrear.setTargetPosition(leftfront.getCurrentPosition()+target3);
+            rightfront.setTargetPosition(leftfront.getCurrentPosition()+target1);
+            rightrear.setTargetPosition(leftfront.getCurrentPosition()+target4);
+
+            leftfront.setPower(Math.abs(speed));
+            leftrear.setPower(Math.abs(speed));
+            rightfront.setPower(Math.abs(speed));
+            rightrear.setPower(Math.abs(speed));
+
+            encoderTimer.reset();
+            while(opModeIsActive()&&((encoderTimer.seconds()<=timeOut)&&
+                    ((leftfront.isBusy()||leftrear.isBusy())||
+                    (rightrear.isBusy()||rightfront.isBusy())))){
+                //nothing...just to make sure everything is finished before going on
+            }
+
+            leftfront.setPower(0);
+            leftrear.setPower(0);
+            rightfront.setPower(0);
+            rightrear.setPower(0);
+            leftfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            telemetry.addData("encoderRun","Completed");
+            telemetry.update();
+
+            sleep((long)sleepTime*1000);
+        }
+
+    }
+
 
     /**
      * Runable Speed Time analog run
