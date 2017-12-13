@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.vuforia.VuMarkTemplate;
 
@@ -25,16 +26,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import java.util.concurrent.TimeUnit;
 
-@Autonomous(name="AutonomousMode_StringCar_Test", group="Linear Opmode")
+@Autonomous(name="AutonomousMode_StringCar_BlueLeague", group="Linear Opmode")
 
-public class AutonomousMode_StringCar_Test extends LinearOpMode {
+public class AutonomousMode_StringCar_BlueLeague extends LinearOpMode {
 
     private DcMotor leftfront;
     private DcMotor rightfront;
     private DcMotor leftrear;
     private DcMotor rightrear;
-    //private DcMotor leftMotor;
-    //private DcMotor rightMotor;
+    private Servo leftServo;
+    private Servo rightServo;
+    private DcMotor leftMotor;
+    private DcMotor rightMotor;
 
     //initiate sensory input method
     private ModernRoboticsI2cGyro gyro;
@@ -51,6 +54,7 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
     private final boolean useColor = false;
     private final boolean useEncoder = true;
 
+
     @Override
     public void runOpMode() {
         /***Hardware initiate***/
@@ -59,16 +63,21 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
         rightfront = hardwareMap.get(DcMotor.class, "motor1");
         leftrear = hardwareMap.get(DcMotor.class, "motor3");
         rightrear = hardwareMap.get(DcMotor.class,"motor4");
-        //leftMotor = hardwareMap.get(DcMotor.class, "leftmotor");
-        //rightMotor = hardwareMap.get(DcMotor.class, "rightmotor");
+        leftServo = hardwareMap.get(Servo.class, "leftservo");
+        rightServo = hardwareMap.get(Servo.class, "rightservo");
+        leftMotor = hardwareMap.get(DcMotor.class, "leftmotor");
+        rightMotor = hardwareMap.get(DcMotor.class, "rightmotor");
+
 
         //set motor direction
         leftfront.setDirection(DcMotor.Direction.REVERSE);
         leftrear.setDirection(DcMotor.Direction.REVERSE);
         rightfront.setDirection(DcMotor.Direction.FORWARD);
         rightrear.setDirection(DcMotor.Direction.FORWARD);
-        //leftMotor.setDirection(DcMotor.Direction.FORWARD);
-        //rightMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftServo.setDirection(Servo.Direction.REVERSE);
+        rightServo.setDirection(Servo.Direction.FORWARD);
+        leftMotor.setDirection(DcMotor.Direction.FORWARD);
+        rightMotor.setDirection(DcMotor.Direction.REVERSE);
 
         //setup camera
         int cameraMonitorViewId = hardwareMap.appContext.getResources().
@@ -79,6 +88,11 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
         //using back camera on phonr
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+
+        //from here on i dont know what i am doing
+
+
+
         //import asset "Relic Vumarks"
         VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         VuforiaTrackable relicTemplate = relicTrackables.get(0);
@@ -100,11 +114,11 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
             telemetry.update();
         }*/
 
-        if(useColor){
+        /*if(useColor){
             colorSensor = hardwareMap.get(ColorSensor.class,"color");
             telemetry.addData("ColorSensor", "^_^");
             telemetry.update();
-        }
+        }*/
 
         if(useEncoder){
             leftfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -113,7 +127,7 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
             rightfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             telemetry.addData("Encoder_Stat", "^_^");
             telemetry.update();
-        }
+        }else{}
 
         //todo wait for start marker
         waitForStart();
@@ -125,16 +139,79 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
         //gyro.resetZAxisIntegrator();
         relicTrackables.activate();
 
-        //todo Marker config Vumark
-        int vuMark_Marker = vumarkRecog(relicTemplate,2);
-        telemetry.addData("vuMark_Marker",vuMark_Marker);
+        int vumarkID = 0;
+        ElapsedTime vumarkTimer = new ElapsedTime();
+        vumarkTimer.reset();
+
+        leftServo.setPosition(0.4);
+        rightServo.setPosition(0.4);
+        leftMotor.setPower(1);
+        rightMotor.setPower(1);
+        sleep(500);
+        leftMotor.setPower(0);
+        rightMotor.setPower(0);
+
+        //identify vumark
+        while (opModeIsActive()){
+            //get vuMark on every loop
+            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            //if there is anything that is recognizable
+            if(vuMark.equals(RelicRecoveryVuMark.LEFT)){
+                vumarkID = 1;
+                telemetry.addData("VuMark", "LEFT");
+                telemetry.update();
+                break;
+            }else if (vuMark.equals(RelicRecoveryVuMark.CENTER)){
+                vumarkID = 2;
+                telemetry.addData("VuMark", "CENTER");
+                telemetry.update();
+                break;
+            }else if(vuMark.equals(RelicRecoveryVuMark.RIGHT)){
+                vumarkID = 3;
+                telemetry.addData("VuMark", "RIGHT");
+                telemetry.update();
+                break;
+            }else{}
+        }
+
+
+        if(vumarkID == 1){
+            analogRun(0,1,0,1.05);
+            analogRun(0,0,0,0.5);
+            analogRun(1,0,-0.4,0.4);//change
+            //analogRun(1,0,-0.4,0.95);
+            //analogRun(1,0,-0.4,1.2);
+            analogRun(0,1,0,0.4);
+
+        }else if(vumarkID==2){
+            analogRun(0,1,0,1.05);
+            analogRun(0,0,0,0.5);
+            //analogRun(1,0,-0.4,0.55);
+            analogRun(1,0,-0.4,0.95);//change
+            //analogRun(1,0,-0.4,1.2);
+            analogRun(0,1,0,0.4);
+
+        }else if(vumarkID==3){
+            analogRun(0,1,0,1.05);
+            analogRun(0,0,0,0.5);
+            //analogRun(1,0,-0.4,0.55);
+            //analogRun(1,0,-0.4,0.95);
+            analogRun(1,0,-0.4,1.2);//change
+            analogRun(0,1,0,0.4);
+        }else{
+
+        }
+
+
+
+
+        /*
+        int vumarkID = vumarkRecog(relicTemplate,2);
+        telemetry.addData("vumark", vumarkID);
         telemetry.update();
+        sleep(5000);
+        //analogRun(0,0.3,0,10);*/
 
-        encoderRun(1120,1120,1120,1120,0.8,10,0.25);
-        encoderRun(-1120,1120,-1120,1120,0.8,10,0.25);
-        encoderRun(-1120,1120,1120,-1120,0.8,10,0.25);
-
-        analogRun(0,-0.5,0,0.5);
 
         /*
         sleep(1000);
@@ -198,7 +275,7 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
         int iTemp = 0;
         ElapsedTime vumarkTimer = new ElapsedTime();
         vumarkTimer.reset();
-        while ((opModeIsActive()&&vumarkTimer.seconds()<=timeOut)&&(iTemp!=0)) {
+        while ((opModeIsActive()&&vumarkTimer.seconds()<=timeOut)) {
             //get vuMark on every loop
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
             //if there is anything that is recognizable
@@ -232,15 +309,20 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
         ElapsedTime encoderTimer = new ElapsedTime();
 
         if(opModeIsActive()){
+            leftfront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftrear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightfront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightrear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
             leftfront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             leftrear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightfront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightrear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            leftfront.setTargetPosition(leftfront.getCurrentPosition()+target2);
-            leftrear.setTargetPosition(leftfront.getCurrentPosition()+target3);
-            rightfront.setTargetPosition(leftfront.getCurrentPosition()+target1);
-            rightrear.setTargetPosition(leftfront.getCurrentPosition()+target4);
+            leftfront.setTargetPosition(target2);
+            leftrear.setTargetPosition(target3);
+            rightfront.setTargetPosition(target1);
+            rightrear.setTargetPosition(target4);
 
             leftfront.setPower(Math.abs(speed));
             leftrear.setPower(Math.abs(speed));
@@ -251,13 +333,15 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
             while(opModeIsActive()&&((encoderTimer.seconds()<=timeOut)&&
                     ((leftfront.isBusy()||leftrear.isBusy())||
                     (rightrear.isBusy()||rightfront.isBusy())))){
-                //nothing...just to make sure everything is finished before going on
+                telemetry.addData("encoderRun","on");
+                telemetry.update();
             }
 
             leftfront.setPower(0);
             leftrear.setPower(0);
             rightfront.setPower(0);
             rightrear.setPower(0);
+
             leftfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             leftrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -271,6 +355,41 @@ public class AutonomousMode_StringCar_Test extends LinearOpMode {
 
     }
 
+    private void encoderRun(int target1, int target2, int target3, int target4, double speed){
+        ElapsedTime encoderTimer = new ElapsedTime();
+
+        if(opModeIsActive()){
+            leftfront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftrear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightfront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightrear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            leftfront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftrear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightfront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightrear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            leftfront.setTargetPosition(target2);
+            leftrear.setTargetPosition(target3);
+            rightfront.setTargetPosition(target1);
+            rightrear.setTargetPosition(target4);
+
+            leftfront.setPower(Math.abs(speed));
+            leftrear.setPower(Math.abs(speed));
+            rightfront.setPower(Math.abs(speed));
+            rightrear.setPower(Math.abs(speed));
+
+            leftfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightrear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightfront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            telemetry.addData("encoderRun","Completed");
+            telemetry.update();
+
+        }
+
+    }
 
     /**
      * Runable Speed Time analog run

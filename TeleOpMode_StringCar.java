@@ -82,6 +82,7 @@ public class TeleOpMode_StringCar extends OpMode
         timer.reset();
         telemetry.addData("Timer", "%.3f",timer.time());
         telemetry.update();
+        frontServo.setPosition(1);
     }
 
     @Override
