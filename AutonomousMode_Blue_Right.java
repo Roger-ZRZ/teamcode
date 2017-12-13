@@ -20,8 +20,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-@Autonomous(name="AutonomousMode", group="Linear Opmode")
-public class AutonomousMode extends LinearOpMode {
+@Autonomous(name="AutonomousMode_Blue_Right", group="Linear Opmode")
+public class AutonomousMode_Blue_Right extends LinearOpMode {
 
     //Main Timer
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
@@ -177,7 +177,10 @@ public class AutonomousMode extends LinearOpMode {
 
             //Move and Place
 
-            teamred(iColor);
+            ball(iColor);
+
+            block();
+
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + timer.toString());
@@ -188,12 +191,13 @@ public class AutonomousMode extends LinearOpMode {
         }
     }
 
-    void teamred(int color) {
 
-        rightfront.setPower(0.3);
-        rightrear.setPower(0.3);
-        leftfront.setPower(0.3);
-        leftrear.setPower(0.3);
+    void ball(int color) {
+
+        rightfront.setPower(0.2);
+        rightrear.setPower(0.2);
+        leftfront.setPower(0.2);
+        leftrear.setPower(0.2);
 
         if (color == 1) {
             telemetry.addData("Color is Red",color);
@@ -211,11 +215,6 @@ public class AutonomousMode extends LinearOpMode {
             side_servo.setPosition(1);
             telemetry.addData("BACK",color);
             telemetry.update();
-            //sleep(3000);
-            rightrear.setTargetPosition(-8000);
-            leftrear.setTargetPosition(-8000);
-            rightfront.setTargetPosition(-8000);
-            leftfront.setTargetPosition(-8000);
         }
         else if (color == -1) {
             telemetry.addData("Color is Blue",color);
@@ -233,11 +232,6 @@ public class AutonomousMode extends LinearOpMode {
             side_servo.setPosition(1);
             telemetry.addData("BACK",color);
             telemetry.update();
-            //sleep(3000);
-            rightrear.setTargetPosition(-8000);
-            leftrear.setTargetPosition(-8000);
-            rightfront.setTargetPosition(-8000);
-            leftfront.setTargetPosition(-8000);
         }
         else {
             telemetry.addData("No Color",color);
@@ -250,13 +244,20 @@ public class AutonomousMode extends LinearOpMode {
             side_servo.setPosition(1);
             telemetry.addData("BACK",color);
             telemetry.update();
-            //sleep(3000);
-            rightrear.setTargetPosition(-8000);
-            leftrear.setTargetPosition(-8000);
-            rightfront.setTargetPosition(-8000);
-            leftfront.setTargetPosition(-8000);
         }
 
+    }
+
+    void block() {
+        rightfront.setPower(0.2);
+        rightrear.setPower(0.2);
+        leftfront.setPower(0.2);
+        leftrear.setPower(0.2);
+
+        rightrear.setTargetPosition(-10000);
+        leftrear.setTargetPosition(-10000);
+        rightfront.setTargetPosition(-10000);
+        leftfront.setTargetPosition(-10000);
     }
 
 
