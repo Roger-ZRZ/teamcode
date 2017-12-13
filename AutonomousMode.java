@@ -40,6 +40,7 @@ public class AutonomousMode extends LinearOpMode {
     private Servo b_clawServo;
     private Servo arm_servo_1;
     private Servo arm_servo_2;
+    private Servo side_servo;
 
 
     //wheel_servos
@@ -85,6 +86,7 @@ public class AutonomousMode extends LinearOpMode {
         b_clawServo = hardwareMap.get(Servo.class,"bclaw");
         arm_servo_1 = hardwareMap.get(Servo.class,"armservo1");
         arm_servo_2 = hardwareMap.get(Servo.class,"armservo2");
+        side_servo = hardwareMap.get(Servo.class,"side");
 
 
         //init CRServos
@@ -124,6 +126,7 @@ public class AutonomousMode extends LinearOpMode {
         leftfront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftrear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+
         arm_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -135,21 +138,27 @@ public class AutonomousMode extends LinearOpMode {
         right_wheel.setPower(0);
         left_wheel.setPower(0);
 
+        side_servo.setPosition(1);
+
         //Print
         telemetry.addData("Status", "init() Done");
         telemetry.update();
 
-        waitForStart();
         relicTrackables.activate();
+        //Detect Pattern
+        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+
+        waitForStart();
 
         while (opModeIsActive()) {
-            //Detect Pattern
-            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+
             if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
                 //put it on dashboard
                 telemetry.addData("VuMark", "%s visible", vuMark);
             }
 
+            side_servo.setPosition(0.45);
+            sleep(2000);
             //Detect Color
             int iColor = 0;
             double dRed = colorSensor.red();
@@ -168,22 +177,87 @@ public class AutonomousMode extends LinearOpMode {
 
             //Move and Place
 
-            rightfront.setPower(0.5);
-            rightrear.setPower(0.5);
-            leftfront.setPower(0.5);
-            leftrear.setPower(0.5);
-
-            rightfront.setTargetPosition(2000);
-            rightrear.setTargetPosition(2000);
-            leftfront.setTargetPosition(2000);
-            leftrear.setTargetPosition(2000);
-
-
+            teamred(iColor);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + timer.toString());
             telemetry.addData("Motors", "leftfront (%d), leftrear (%d), rightfront (%d), rightrear (%d)", leftfront.getCurrentPosition(), leftrear.getCurrentPosition(), rightfront.getCurrentPosition(), rightrear.getCurrentPosition());
             telemetry.update();
+
+            break;
         }
     }
+
+    void teamred(int color) {
+
+        rightfront.setPower(0.3);
+        rightrear.setPower(0.3);
+        leftfront.setPower(0.3);
+        leftrear.setPower(0.3);
+
+        if (color == 1) {
+            telemetry.addData("Color is Red",color);
+            telemetry.update();
+            rightrear.setTargetPosition(200);
+            leftrear.setTargetPosition(-200);
+            rightfront.setTargetPosition(200);
+            leftfront.setTargetPosition(-200);
+            sleep(1000);
+            rightrear.setTargetPosition(0);
+            leftrear.setTargetPosition(0);
+            rightfront.setTargetPosition(0);
+            leftfront.setTargetPosition(0);
+            sleep(1000);
+            side_servo.setPosition(1);
+            telemetry.addData("BACK",color);
+            telemetry.update();
+            //sleep(3000);
+            rightrear.setTargetPosition(-8000);
+            leftrear.setTargetPosition(-8000);
+            rightfront.setTargetPosition(-8000);
+            leftfront.setTargetPosition(-8000);
+        }
+        else if (color == -1) {
+            telemetry.addData("Color is Blue",color);
+            telemetry.update();
+            rightrear.setTargetPosition(-200);
+            leftrear.setTargetPosition(200);
+            rightfront.setTargetPosition(-200);
+            leftfront.setTargetPosition(200);
+            sleep(1000);
+            rightrear.setTargetPosition(0);
+            leftrear.setTargetPosition(0);
+            rightfront.setTargetPosition(0);
+            leftfront.setTargetPosition(0);
+            sleep(1000);
+            side_servo.setPosition(1);
+            telemetry.addData("BACK",color);
+            telemetry.update();
+            //sleep(3000);
+            rightrear.setTargetPosition(-8000);
+            leftrear.setTargetPosition(-8000);
+            rightfront.setTargetPosition(-8000);
+            leftfront.setTargetPosition(-8000);
+        }
+        else {
+            telemetry.addData("No Color",color);
+            telemetry.update();
+            rightrear.setTargetPosition(0);
+            leftrear.setTargetPosition(0);
+            rightfront.setTargetPosition(0);
+            leftfront.setTargetPosition(0);
+            sleep(1000);
+            side_servo.setPosition(1);
+            telemetry.addData("BACK",color);
+            telemetry.update();
+            //sleep(3000);
+            rightrear.setTargetPosition(-8000);
+            leftrear.setTargetPosition(-8000);
+            rightfront.setTargetPosition(-8000);
+            leftfront.setTargetPosition(-8000);
+        }
+
+    }
+
+
 }
