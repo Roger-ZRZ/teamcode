@@ -170,19 +170,13 @@ public class TeleOpMode_StringCar extends OpMode
         if(gamepad1.a){
             leftMotor.setPower(-1);
             rightMotor.setPower(-1);
-        }else{
-            leftMotor.setPower(0);
-            rightMotor.setPower(0);
-        }
-
-        if(gamepad1.b){
+        }else if(gamepad1.b){
             leftMotor.setPower(1);
             rightMotor.setPower(1);
         }else{
             leftMotor.setPower(0);
             rightMotor.setPower(0);
         }
-
 
         //experimental
         if(gamepad1.x&&!gamepad1_stat[0]){
